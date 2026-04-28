@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2f7;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .top-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .gmail-btn {
+            background: #db4437;
+            color: white;
+        }
+
+        .refresh-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .email-box {
+            background: white;
+            padding: 15px;
+            margin: 10px auto;
+            width: 80%;
+            border-radius: 8px;
+            box-shadow: 0 0 5px #ccc;
+        }
+
+        .intent {
+            color: green;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 16px;
+            color: gray;
+        }
+
+        .error {
+            text-align: center;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Email Intent Dashboard</h2>
+
+<div class="top-bar">
+    <button class="gmail-btn" onclick="connectGmail()">Connect Gmail</button>
+    <button class="refresh-btn" onclick="loadEmails()">Refresh Emails</button>
+</div>
+
+<div id="emails"></div>
+
+<script>
+
+    // =========================
+    // CONNECT GMAIL
+    // =========================
+    function connectGmail() {
+        window.location.href = "http://127.0.0.1:5001/login";
+    }
+
+    // =========================
+    // LOAD EMAILS FUNCTION
+    // =========================
+    function loadEmails() {
+
+        const container = document.getElementById("emails");
+
+        // Show loading message
+        container.innerHTML = "<p class='loading'>Loading emails...</p>";
+
+        fetch("https://your-backend.onrender.com/predict")
+        .then(response => response.json())
+        .then(data => {
+
+            container.innerHTML = "";
+
+            // If no emails
+            if (!data || data.length === 0) {
+                container.innerHTML = "<p class='loading'>No emails found.</p>";
+                return;
+            }
+
+            // Loop through emails
+            data.forEach(item => {
+
+                const div = document.createElement("div");
+                div.className = "email-box";
+
+                div.innerHTML = `
+                    <p><b>Email:</b> ${item.email_preview}</p>
+                    <p class="intent">Intent: ${item.intent}</p>
+                `;
+
+                container.appendChild(div);
+            });
+
+        })
+        .catch(error => {
+            container.innerHTML = "<p class='error'>Error loading emails</p>";
+            console.log("Error:", error);
+        });
+    }
+
+    // =========================
+    // AUTO LOAD ON PAGE OPEN
+    // =========================
+    window.onload = function() {
+        loadEmails();
+    };
+
+</script>
+
+</body>
+</html>
